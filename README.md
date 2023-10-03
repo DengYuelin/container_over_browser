@@ -14,6 +14,6 @@ Prequisites:
 
 The two steps are documented in:
 - `docker_build.sh` -- Step 1, build the container.
-- `docker_browser_access_up` -- Step 2, start the service. This script must be executed from **within** the created container.
+- `docker_browser_access_up.sh` -- Step 2, start the service. This script must be executed from **within** the created container.
 
 This setup is inspired by the [Minimal ADE](https://gitlab.com/ApexAI/minimal-ade) repository.
