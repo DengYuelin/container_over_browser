@@ -1,0 +1,18 @@
+export ADE_DOCKER_RUN_ARGS="--cap-add=SYS_PTRACE \
+                            --privileged \
+                            # --net=pub_net \
+                            --net=host \
+                            # NOTE: please refer to docker_build.sh for pub_net usage
+                            --add-host ${ADE_NAME:-ade}:127.0.0.1 \
+                            # NOTE: please refer to docker_browser_access_up.sh for ADE_NAME usage
+                            --mount type=tmpfs,target=/var/cache/apt \
+                            --mount type=tmpfs,target=/var/lib/apt/lists \
+                            --mount type=tmpfs,target=/root/.cache \
+                            -v ${HOME}/.Xauthority:/tmp/.docker.xauth:ro \
+                            -v /dev/shm:/dev/shm \
+                            -e XAUTHORITY=/tmp/.docker.xauth \
+                            -e XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR} \
+                            -e NVIDIA_DRIVER_CAPABILITIES=all"
+export ADE_IMAGES="
+  container_over_browser_base:latest
+"

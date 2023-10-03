@@ -1,0 +1,14 @@
+:{$ACCESS_PORT} {
+    log
+    root * /home/{$USER}
+    reverse_proxy 127.0.0.1:6080
+
+    handle_path /files/* {
+        file_server browse
+    }
+    redir /files /files/
+
+    basicauth {
+        {$USER} {$HTTP_BASIC_AUTH_PASSWD_HASH}
+    }
+}

@@ -1,0 +1,19 @@
+# ADE home
+ade
+.adecreds
+.Xauthority
+.bash*
+.python*
+.gitconfig
+.profile
+.wget-hsts
+.cache/
+.cmake/
+.config/
+.dotnet/
+.local/
+.nuget/
+.nv/
+.ros/
+.rviz2/
+.ssh/
