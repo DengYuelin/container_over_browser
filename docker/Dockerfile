@@ -1,16 +1,16 @@
-# syntax=docker/dockerfile:1.2
+# syntax=docker/dockerfile:1.6
 
-# noVNC server bundle and Caddy requires GoLang
+# Caddy requires GoLang
 FROM golang:bullseye AS golang_build
 WORKDIR /src
 RUN --mount=type=cache,target=/root/go \
-    # build Easy-noVNC
     go mod init build && \
-    go get github.com/geek1011/easy-novnc@v1.1.0 && \
-    go build -o /usr/local/bin/easy-novnc github.com/geek1011/easy-novnc && rm -rf ./* && \
+    # build Easy-noVNC -- this repo is archived and no longer updates.
+    # go get github.com/geek1011/easy-novnc@v1.1.0 && \
+    # go build -o /usr/local/bin/easy-novnc github.com/geek1011/easy-novnc && rm -rf ./* && \
     # build Caddy
     printf "module caddy\n\
-    require github.com/caddyserver/caddy/v2 v2.6.4\n\
+    require github.com/caddyserver/caddy/v2 v2.7.4\n\
     require github.com/mholt/caddy-webdav master\n" > go.mod && \
     printf "package main\n\
     import caddycmd \"github.com/caddyserver/caddy/v2/cmd\"\n\
@@ -42,8 +42,10 @@ RUN --mount=type=cache,target=/var/cache/apt \
     # net-tools iputils-ping
 
 # copy over the built noVNC and caddy servers
+# COPY --from=golang_build /usr/local/bin/easy-novnc /usr/local/bin/    # switched to the native version below.
+ADD --keep-git-dir=false https://github.com/novnc/noVNC.git#master /opt/noVNC
+ADD --keep-git-dir=false https://github.com/novnc/websockify.git#master /opt/noVNC/utils/websockify
 COPY --from=golang_build /usr/local/bin/caddy /usr/local/bin/
-COPY --from=golang_build /usr/local/bin/easy-novnc /usr/local/bin/
 
 # disable sudo user password and copy over ADE configs
 RUN echo 'ALL ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers

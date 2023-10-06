@@ -8,6 +8,10 @@
     }
     redir /files /files/
 
+    redir / /vnc.html
+    redir /vnc /vnc.html
+    redir /vnc/ /vnc/html
+
     basicauth {
         {$USER} {$HTTP_BASIC_AUTH_PASSWD_HASH}
     }
