@@ -1,16 +1,22 @@
 :{$ACCESS_PORT} {
     log
     root * /home/{$USER}
+
     reverse_proxy 127.0.0.1:6080
+    redir / /vnc.html   
+    redir /vnc /vnc.html 
+    redir /vnc/ /vnc.html
 
     handle_path /files/* {
         file_server browse
     }
     redir /files /files/
 
-    redir / /vnc.html
-    redir /vnc /vnc.html
-    redir /vnc/ /vnc/html
+    handle_path /dev/* {
+        reverse_proxy 127.0.0.1:3000
+    }
+    redir /dev /dev/
+    reverse_proxy /stable* 127.0.0.1:3000
 
     basicauth {
         {$USER} {$HTTP_BASIC_AUTH_PASSWD_HASH}

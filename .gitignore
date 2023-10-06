@@ -17,3 +17,5 @@ ade
 .ros/
 .rviz2/
 .ssh/
+.openvscode-server/
+
