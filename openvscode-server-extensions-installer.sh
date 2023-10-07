@@ -17,7 +17,7 @@ urls=(\
 # Download via wget from $urls array.
 for url in "${urls[@]}"; do
     pkg_name=$(echo ${url} | cut -d '/' -f 9)
-    if [[ ! find ${pkg_name} -ctime -7 ]]; then
+    if [[ ! $(find ${pkg_name} -ctime -7) ]]; then
         wget "${url}"
     fi
     ${OPENVSCODE_SERVER_ROOT}/bin/openvscode-server --extensions-dir /home/$TARGET_USER/.openvscode-server/extensions/ --install-extension ${pkg_name}
@@ -29,7 +29,7 @@ ms_marketplace_urls=(\
 )
 for ms_raw in "${ms_marketplace_urls[@]}"; do
     pkg_name=$(echo ${ms_raw} | cut -d '/' -f 10)
-    if [[ ! find ${pkg_name}.vsix -ctime -7 ]]; then
+    if [[ ! $(find ${pkg_name}.vsix -ctime -7) ]]; then
         wget --limit-rate=750k -O - ${ms_raw} | gunzip -c  > ${pkg_name}.vsix
     fi
     ${OPENVSCODE_SERVER_ROOT}/bin/openvscode-server --extensions-dir /home/$TARGET_USER/.openvscode-server/extensions/ --install-extension ${pkg_name}.vsix
@@ -46,7 +46,7 @@ exts=(\
     ms-python.black-formatter \
     ms-python.flake8 \
     ms-python.python \
-    ms-python.pyright \
+    ms-pyright.pyright \
     ms-toolsai.jupyter \
     njpwerner.autodocstring \
     RandomFractalsInc.geo-data-viewer \
