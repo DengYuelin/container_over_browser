@@ -44,4 +44,8 @@ fi
 
 # with the new user, swithc to the new user and start the remote access service
 PASSWD_HASH=$(caddy hash-password --plaintext $NEW_PASSWD)
-echo $NEW_PASSWD | sudo HTTP_BASIC_AUTH_PASSWD_HASH=$PASSWD_HASH ACCESS_PORT=$ACCESS_PORT -S su $NEW_USER -c "supervisord -c /etc/supervisord.conf"
+if [[ "$NEW_USER" != "$USER" ]]; then
+    echo $NEW_PASSWD | sudo HTTP_BASIC_AUTH_PASSWD_HASH=$PASSWD_HASH ACCESS_PORT=$ACCESS_PORT -S su $NEW_USER -c "supervisord -c /etc/supervisord.conf"
+else
+    HTTP_BASIC_AUTH_PASSWD_HASH=$PASSWD_HASH ACCESS_PORT=$ACCESS_PORT supervisord -c /etc/supervisord.conf
+fi
