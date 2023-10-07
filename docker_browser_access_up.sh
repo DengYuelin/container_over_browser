@@ -37,12 +37,9 @@ if [[ ! $(cat /etc/passwd | grep $NEW_USER) ]] ; then
     # copy over lxterminal beautify config
     mkdir -p ~/$NEW_USER/.config/lxterminal/
     cp ~/docker/lxterminal.conf ~/$NEW_USER/.config/lxterminal/
-    sudo chown -R $NEW_USER /home/$NEW_USER/*
 
-    mkdir /home/$NEW_USER/.openvscode-server
-    sudo chmod 755 /home/$NEW_USER/.openvscode-server
-    ln -s /opt/openvscode-server/extensions /home/$NEW_USER/.openvscode-server/extensions
-    sudo chown $NEW_USER /home/$NEW_USER/.openvscode-server
+    sudo chown $NEW_USER -R ~/$NEW_USER/
+    sudo chgrp $GROUP_ID -R ~/$NEW_USER/
 fi
 
 # with the new user, swithc to the new user and start the remote access service

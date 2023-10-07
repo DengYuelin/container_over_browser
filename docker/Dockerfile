@@ -42,7 +42,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     apt-get install -y --no-install-recommends sudo tzdata && \
     apt-get install -y --no-install-recommends \
     lsb-release gnupg2 ca-certificates openbox menu tigervnc-standalone-server supervisor \
-    lxterminal mesa-utils vulkan-tools openvpn bridge-utils vim nano gzip wget
+    lxterminal mesa-utils vulkan-tools openvpn bridge-utils vim nano git gzip wget
 
 # copy over the built noVNC and caddy servers
 # COPY --from=golang_build /usr/local/bin/easy-novnc /usr/local/bin/    # switched to the native version below.
@@ -68,49 +68,6 @@ ENV VK_ICD_FILENAMES /etc/vulkan/icd.d/nvidia_icd.json
 # OpenVSCode-Server
 COPY --from=openvscode-server /home/.openvscode-server /opt/openvscode-server
 ENV OPENVSCODE_SERVER_ROOT="/opt/openvscode-server"
-RUN \
-    # Direct download links to external .vsix not available on https://open-vsx.org/
-    urls=(\
-        https://github.com/lharri73/DBC-Language-Syntax/releases/latest/download/dbc-2.0.0.vsix \
-        https://github.com/microsoft/vscode-cpptools/releases/latest/download/cpptools-linux.vsix \
-    )\
-    # Create a tmp dir for downloading
-    && tdir=/tmp/exts && mkdir -p "${tdir}" && cd "${tdir}" \
-    # Download via wget from $urls array.
-    && wget "${urls[@]}" && \
-    ms_marketplace_urls=(\
-        https://marketplace.visualstudio.com/_apis/public/gallery/publishers/nonanonno/vsextensions/vscode-ros2/0.1.5/vspackage \
-        https://marketplace.visualstudio.com/_apis/public/gallery/publishers/ms-iot/vsextensions/vscode-ros/0.9.5/vspackage \
-    )\
-    && for ms_raw in "${ms_marketplace_urls[@]}"; do \
-        wget ${ms_raw}; \
-        mv vspackage vspackage.gz; \
-        gunzip vspackage.gz; \
-        pkg_name=$(echo ${ms_raw} | cut -d '/' -f 10); \
-        mv vspackage ${pkg_name}.vsix; \
-    done && \
-    # List the extensions in this array
-    exts=(\
-        # From https://open-vsx.org/ registry directly
-        cschlosser.doxdocgen \
-        eamodio.gitlens \
-        jeff-hykin.better-cpp-syntax \
-        ms-python.isort \
-        ms-python.python \
-        njpwerner.autodocstring \
-        RandomFractalsInc.geo-data-viewer \
-        redhat.vscode-xml \
-        redhat.vscode-yaml \
-        shd101wyy.markdown-preview-enhanced \
-        Gruntfuggly.todo-tree \
-        twxs.cmake \
-        muhammad-sammy.csharp \
-        # From filesystem, .vsix that we downloaded (using bash wildcard '*')
-        "${tdir}"/* \
-    )\
-    # Install the $exts
-    && for ext in "${exts[@]}"; do ${OPENVSCODE_SERVER_ROOT}/bin/openvscode-server --extensions-dir /opt/openvscode-server/extensions/ --install-extension "${ext}"; done \
-    && rm -rf "${tdir}" && chmod g+w /opt/openvscode-server/extensions/
 
 # wrap up
 ENTRYPOINT ["/ade_entrypoint"]
