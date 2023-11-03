@@ -42,7 +42,20 @@ RUN --mount=type=cache,target=/var/cache/apt \
     apt-get install -y --no-install-recommends sudo tzdata && \
     apt-get install -y --no-install-recommends \
     lsb-release gnupg2 ca-certificates openbox menu tigervnc-standalone-server supervisor \
-    lxterminal mesa-utils vulkan-tools openvpn bridge-utils vim nano git gzip wget
+    lxterminal mesa-utils vulkan-tools openvpn bridge-utils vim nano git gzip wget curl
+
+# install docker cli tools
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=type=cache,target=/var/lib/apt/lists \
+    install -m 0755 -d /etc/apt/keyrings && \
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
+    chmod a+r /etc/apt/keyrings/docker.gpg && \
+    echo \
+    "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+    "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+    tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends docker-ce-cli
 
 # copy over the built noVNC and caddy servers
 # COPY --from=golang_build /usr/local/bin/easy-novnc /usr/local/bin/    # switched to the native version below.

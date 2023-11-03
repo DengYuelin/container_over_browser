@@ -33,13 +33,17 @@ if [[ ! $(cat /etc/passwd | grep $NEW_USER) ]] ; then
     echo "$NEW_USER:$NEW_PASSWD" | sudo chpasswd
 
     # allow graphics access for the new user, copy env variable setup script, etc.
-    cp -r ~/.Xauthority ~/.bashrc ~/.profile ~/$NEW_USER/
+    cp -r /home/$USER/.Xauthority /home/$USER/.bashrc /home/$USER/.profile /home/$NEW_USER/
     # copy over lxterminal beautify config
-    mkdir -p ~/$NEW_USER/.config/lxterminal/
-    cp ~/docker/lxterminal.conf ~/$NEW_USER/.config/lxterminal/
+    mkdir -p /home/$NEW_USER/.config/lxterminal/
+    cp /home/$USER/docker/lxterminal.conf /home/$NEW_USER/.config/lxterminal/
 
-    sudo chown $NEW_USER -R ~/$NEW_USER/
-    sudo chgrp $GROUP_ID -R ~/$NEW_USER/
+    sudo chown $NEW_USER -R /home/$NEW_USER/
+    sudo chgrp $GROUP_ID -R /home/$NEW_USER/
+elif [[ "$NEW_USER" == "$USER" ]]; then
+    # change my own config if new_user is user
+    mkdir -p /home/$USER/.config/lxterminal/
+    cp /home/$USER/docker/lxterminal.conf /home/$USER/.config/lxterminal/
 fi
 
 # with the new user, swithc to the new user and start the remote access service

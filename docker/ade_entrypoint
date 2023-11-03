@@ -20,7 +20,6 @@ if [[ -n "$TIMEZONE" ]]; then
     dpkg-reconfigure -f noninteractive tzdata
 fi
 
-
 groupdel "$GROUP" &>/dev/null || true
 groupadd -og "$GROUP_ID" "$GROUP"
 
@@ -31,6 +30,12 @@ groupadd -og "${VIDEO_GROUP_ID}" video
 gpasswd -a "${USER}" video
 
 usermod -aG dialout ${USER}
+
+if [[ /var/run/docker.sock ]]; then
+    DOCKER_GROUP_ID=$(stat -c "%g" /var/run/docker.sock)
+    groupadd -og ${DOCKER_GROUP_ID} docker
+    usermod -aG docker ${USER}
+fi
 
 for x in /etc/skel/.*; do
     target="/home/$USER/$(basename "$x")"
