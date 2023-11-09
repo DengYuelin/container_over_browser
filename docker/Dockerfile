@@ -19,7 +19,7 @@
 #    func main() { caddycmd.Main() }\n" > caddy.go && \
 #    go mod tidy && go build -o /usr/local/bin/caddy . && cd / && rm -rf /src
 
-FROM caddy:alpine AS caddy
+FROM caddy:latest AS caddy
 
 FROM gitpod/openvscode-server:latest AS openvscode-server
 
@@ -41,8 +41,8 @@ RUN --mount=type=cache,target=/var/cache/apt \
     DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC \
     apt-get install -y --no-install-recommends sudo tzdata && \
     apt-get install -y --no-install-recommends \
-    lsb-release gnupg2 ca-certificates menu supervisor openvpn bridge-utils vim nano git gzip wget curl\
-    openbox tigervnc-standalone-server lxterminal libegl1 libxext6 mesa-utils vulkan-tools
+    lsb-release gnupg2 ca-certificates bash-completion supervisor openvpn bridge-utils vim nano git gzip wget curl\
+    menu openbox tigervnc-standalone-server lxterminal libegl1 libxext6 mesa-utils vulkan-tools
 
 # install docker cli tools
 RUN --mount=type=cache,target=/var/cache/apt \
@@ -55,7 +55,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
     tee /etc/apt/sources.list.d/docker.list > /dev/null && \
     apt-get update && \
-    apt-get install -y --no-install-recommends docker-ce-cli
+    apt-get install -y --no-install-recommends docker-ce-cli docker-buildx-plugin docker-compose-plugin
 
 # copy over the built noVNC and caddy servers
 # COPY --from=golang_build /usr/local/bin/easy-novnc /usr/local/bin/    # switched to the native version below.
