@@ -41,8 +41,8 @@ RUN --mount=type=cache,target=/var/cache/apt \
     DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC \
     apt-get install -y --no-install-recommends sudo tzdata && \
     apt-get install -y --no-install-recommends \
-    lsb-release gnupg2 ca-certificates openbox menu tigervnc-standalone-server supervisor \
-    lxterminal mesa-utils vulkan-tools openvpn bridge-utils vim nano git gzip wget curl
+    lsb-release gnupg2 ca-certificates menu supervisor openvpn bridge-utils vim nano git gzip wget curl\
+    openbox tigervnc-standalone-server lxterminal libegl1 libxext6 mesa-utils vulkan-tools
 
 # install docker cli tools
 RUN --mount=type=cache,target=/var/cache/apt \
@@ -75,8 +75,9 @@ COPY ./docker/Caddyfile /etc/
 COPY ./docker/apt_01norecommends /etc/apt/apt.conf.d/01norecommends
 
 # enable NVIDIA GPU access for rendering inside contianers
-COPY ./docker/nvidia_icd.json /etc/vulkan/icd.d/nvidia_icd.json
-ENV VK_ICD_FILENAMES /etc/vulkan/icd.d/nvidia_icd.json
+COPY ./docker/vulkan_nvidia_icd.json /usr/share/vulkan/icd.d/nvidia_icd.json
+COPY ./docker/vulkan_nvidia_layers.json /usr/share/vulkan/icd.d/nvidia_layers.json
+COPY ./docker/egl_10_nvidia.json /usr/share/glvnd/egl_vendor.d/10_nvidia.json
 
 # OpenVSCode-Server
 COPY --from=openvscode-server /home/.openvscode-server /opt/openvscode-server
