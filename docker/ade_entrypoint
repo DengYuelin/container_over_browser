@@ -32,7 +32,7 @@ gpasswd -a "${USER}" video
 echo "Adding user ${USER} to group dialout"
 usermod -aG dialout ${USER}
 
-if [[ /var/run/docker.sock ]]; then
+if [[ -e /var/run/docker.sock ]]; then
     DOCKER_GROUP_ID=$(stat -c "%g" /var/run/docker.sock)
     groupadd -og ${DOCKER_GROUP_ID} docker
     echo "Adding user ${USER} to group docker"

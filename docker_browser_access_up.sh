@@ -17,14 +17,14 @@
 
 NEW_USER=${1:-test_usr}
 NEW_PASSWD=${2:-ecet581@purdue.edu}
-ACCESS_PORT=${3:-9051}
+ACCESS_PORT=${3:-9080}
 
 # if the new user does not exist, create it
 if [[ ! $(cat /etc/passwd | grep $NEW_USER) ]] ; then
     # creation of home directory
-    mkdir -p "/home/$USER/$NEW_USER"
-    if [ ! -s /home/$NEW_USER ] ; then
-        sudo ln -s -f /home/$USER/$NEW_USER /home/$NEW_USER
+    mkdir -p /home/$USER/users/$NEW_USER
+    if [[ ! -s /home/$NEW_USER ]] ; then
+        sudo ln -s -f /home/$USER/users/$NEW_USER /home/$NEW_USER
     fi
     # add the user to the system, assign proper groups
     sudo useradd -M -g "$GROUP_ID" -d "/home/$NEW_USER" -s /bin/bash "$NEW_USER"
@@ -32,14 +32,23 @@ if [[ ! $(cat /etc/passwd | grep $NEW_USER) ]] ; then
     sudo usermod -aG dialout $NEW_USER
     echo "$NEW_USER:$NEW_PASSWD" | sudo chpasswd
 
-    # allow graphics access for the new user, copy env variable setup script, etc.
-    cp -r /home/$USER/.Xauthority /home/$USER/.bashrc /home/$USER/.profile /home/$NEW_USER/
+    # copy env variable setup script, etc.
+    cp -r /home/$USER/.bashrc /home/$USER/.profile /home/$NEW_USER/
     # copy over lxterminal beautify config
     mkdir -p /home/$NEW_USER/.config/lxterminal/
     cp /home/$USER/docker/lxterminal.conf /home/$NEW_USER/.config/lxterminal/
+    cp /home/$USER/.bashrc /home/$NEW_USER/.bashrc
+    echo "cd /home/\${USER}/" >> /home/$NEW_USER/.bashrc
+
+    # MFET 442: deploy vscode extensions and settings
+    if [[ -d /home/$USER/.openvscode-server ]] ; then
+        cp -r /home/$USER/.openvscode-server /home/$NEW_USER/
+        rm -rf /home/$NEW_USER/.openvscode-server/extension_download_cache
+    fi
 
     sudo chown $NEW_USER -R /home/$NEW_USER/
     sudo chgrp $GROUP_ID -R /home/$NEW_USER/
+    sudo chmod g+rw -R /home/$NEW_USER/
 elif [[ "$NEW_USER" == "$USER" ]]; then
     # change my own config if new_user is user
     mkdir -p /home/$USER/.config/lxterminal/

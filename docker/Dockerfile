@@ -38,7 +38,27 @@ FROM caddy:latest AS caddy
 FROM gitpod/openvscode-server:latest AS openvscode-server
 
 # this is the base OS image
-FROM ubuntu:jammy AS container_over_browser_base
+FROM ros:noetic-ros-core-focal AS ros_noetic_desktop_full
+
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=type=cache,target=/var/lib/apt/lists \
+    apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y ros-noetic-desktop-full && \
+    apt-get install -y python3-rosdep python3-rosinstall python3-rosinstall-generator \
+        python3-wstool build-essential python3-rosdep && \
+    rosdep init
+
+FROM ros:humble-ros-core-jammy AS ros2_humble_desktop
+
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=type=cache,target=/var/lib/apt/lists \
+    apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y ros-${ROS_DISTRO}-desktop
+
+FROM ros2_humble_desktop AS mfet442
+# FROM ros_noetic_desktop_full AS mfet442
 
 SHELL ["/bin/bash", "-c"]
 
