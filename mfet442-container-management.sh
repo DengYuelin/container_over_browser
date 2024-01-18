@@ -72,6 +72,7 @@ ide_start(){
     "~/docker_browser_access_up.sh ${NEWUSR} ${NEWUSRPASSWD} ${USER_ACCESS_PORT}"
   echo "USERNAME          PASSWORD        ACCESS_ADDRESS"
   echo "${NEWUSR}      ${NEWUSRPASSWD}        ${ADDR}:${USER_ACCESS_PORT}"
+  echo ""
 }
 
 # MFET442-specific
@@ -79,15 +80,15 @@ if [ $1 == "start" ]; then
   # create the MACVLAN interface of docker, to bridge containers onto host network
   if [[ ! $(docker network ls | grep ${DOCKER_MACVLAN_NAME}) ]] ; then
     docker network create -d macvlan \
-      --subnet=${SUBNET}/${NETMASK} --gateway=${GATEWAY} \ 
+      --subnet=${SUBNET}/${NETMASK} --gateway=${GATEWAY} \
       --ip-range=$(ip_add ${START_IP} $((${START_ID}-1)))/${IP_RANGE_MASK} \
       -o parent=${NETWORK_INTERFACE} ${DOCKER_MACVLAN_NAME}
   fi
   # The following part starts the containers
-  for i in {${START_ID}..${ROS1_END_ID}} ; do
+  for i in $(seq ${START_ID} ${ROS1_END_ID}) ; do
     ide_start ${i} mfet442:ros-noetic-desktop-full
   done
-  for i in {$((${ROS1_END_ID}+1))..${ROS2_END_ID}} ; do
+  for i in $(seq $((${ROS1_END_ID}+1)) ${ROS2_END_ID}) ; do
     ide_start ${i} mfet442:ros2-humble-desktop
   done
 elif [ $1 == "restart_one_instance_as_ros1" ]; then
@@ -97,24 +98,24 @@ elif [ $1 == "restart_one_instance_as_ros2" ]; then
   ADE_NAME=${CONTAINER_PREFIX}$2 ./ade stop
   ide_start $2 mfet442:ros2-humble-desktop
 elif [ $1 == "deploy" ]; then
-  for i in {${START_ID}..${ROS1_END_ID}} ; do
+  for i in $(seq ${START_ID} ${ROS1_END_ID}) ; do
     cp -R $2 ./users/${USER_PREFIX}${i}/
   done
-  for i in {$((${ROS1_END_ID}+1))..${ROS2_END_ID}} ; do
+  for i in $(seq $((${ROS1_END_ID}+1)) ${ROS2_END_ID}) ; do
     cp -R $2 ./users/${USER_PREFIX}${i}/
   done
 elif [ $1 == "stop" ]; then
-  for i in {${START_ID}..${ROS1_END_ID}} ; do
+  for i in $(seq ${START_ID} ${ROS1_END_ID}) ; do
     ADE_NAME=${CONTAINER_PREFIX}${i} ./ade stop
   done
-  for i in {$((${ROS1_END_ID}+1))..${ROS2_END_ID}} ; do
+  for i in $(seq $((${ROS1_END_ID}+1)) ${ROS2_END_ID}) ; do
     ADE_NAME=${CONTAINER_PREFIX}${i} ./ade stop
   done
 elif [ $1 == "purge" ]; then
-  for i in {${START_ID}..${ROS1_END_ID}} ; do
+  for i in $(seq ${START_ID} ${ROS1_END_ID}) ; do
     docker container rm -f ${CONTAINER_PREFIX}${i}
   done
-  for i in {$((${ROS1_END_ID}+1))..${ROS2_END_ID}} ; do
+  for i in $(seq $((${ROS1_END_ID}+1)) ${ROS2_END_ID}) ; do
     docker container rm -f ${CONTAINER_PREFIX}${i}
   done
   docker network rm ${DOCKER_MACVLAN_NAME}
