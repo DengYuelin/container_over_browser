@@ -75,6 +75,12 @@ ide_start(){
   echo ""
 }
 
+if [[ ! -e ./ade ]] ; then
+  wget https://gitlab.com/ApexAI/ade-cli/-/jobs/1859684348/artifacts/raw/dist/ade+x86_64
+  mv ./ade+x86_64 ./ade
+  chmod +x ./ade
+fi
+
 # MFET442-specific
 if [ $1 == "start" ]; then
   # create the MACVLAN interface of docker, to bridge containers onto host network
