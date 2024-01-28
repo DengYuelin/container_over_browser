@@ -21,12 +21,16 @@ if [[ -n "$TIMEZONE" ]]; then
 fi
 
 groupdel "$GROUP" &>/dev/null || true
-groupadd -og "$GROUP_ID" "$GROUP"
+groupadd -f -og "$GROUP_ID" "$GROUP"
 
-useradd -M -u "$USER_ID" -g "$GROUP_ID" -d "/home/$USER" -s /bin/bash "$USER"
+if id "$USER" >/dev/null 2>&1; then
+    echo 'User $USER found. Skipping creation'
+else
+    useradd -M -u "$USER_ID" -g "$GROUP_ID" -d "/home/$USER" -s /bin/bash "$USER"
+fi
 
 groupdel video &> /dev/null || true
-groupadd -og "${VIDEO_GROUP_ID}" video
+groupadd -f -og "${VIDEO_GROUP_ID}" video
 gpasswd -a "${USER}" video
 
 echo "Adding user ${USER} to group dialout"
@@ -34,7 +38,7 @@ usermod -aG dialout ${USER}
 
 if [[ -e /var/run/docker.sock ]]; then
     DOCKER_GROUP_ID=$(stat -c "%g" /var/run/docker.sock)
-    groupadd -og ${DOCKER_GROUP_ID} docker
+    groupadd -f -og ${DOCKER_GROUP_ID} docker
     echo "Adding user ${USER} to group docker"
     usermod -aG docker ${USER}
 fi
