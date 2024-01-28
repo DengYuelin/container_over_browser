@@ -12,13 +12,13 @@
 #
 # 2. Please modify the parameters below accordingly.
 # ID range of clients on this machine. This number is 1-based.
-START_ID=1
+START_ID=3
 # MFET442-specific: start a mix of ROS1 and ROS2 clients
 ROS1_END_ID=12
 ROS2_END_ID=16
 CONTAINER_PREFIX=crl-client-
 USER_PREFIX=crl
-USER_ACCESS_PORT=2701		# set to circumvent Purdue LAN firewall rules
+USER_ACCESS_PORT=2701           # set to circumvent Purdue LAN firewall rules
 # network interface to bind clients to
 NETWORK_INTERFACE=enp0s31f6
 # subnet of clients
@@ -70,16 +70,10 @@ ide_start(){
   NEWUSRPASSWD=${NEWUSR}@purdue.edu
   docker exec -d --user $USER ${CONTAINER_PREFIX}${ID} /bin/bash -c \
     "~/docker_browser_access_up.sh ${NEWUSR} ${NEWUSRPASSWD} ${USER_ACCESS_PORT}"
-  echo "USERNAME          PASSWORD        ACCESS_ADDRESS"
+  echo "USERNAME   PASSWORD        ACCESS_ADDRESS"
   echo "${NEWUSR}      ${NEWUSRPASSWD}        ${ADDR}:${USER_ACCESS_PORT}"
   echo ""
 }
-
-if [[ ! -e ./ade ]] ; then
-  wget https://gitlab.com/ApexAI/ade-cli/-/jobs/1859684348/artifacts/raw/dist/ade+x86_64
-  mv ./ade+x86_64 ./ade
-  chmod +x ./ade
-fi
 
 # MFET442-specific
 if [ $1 == "start" ]; then
@@ -96,6 +90,19 @@ if [ $1 == "start" ]; then
   done
   for i in $(seq $((${ROS1_END_ID}+1)) ${ROS2_END_ID}) ; do
     ide_start ${i} mfet442:ros2-humble-desktop
+  done
+elif [ $1 == "restart" ]; then
+  for i in $(seq ${START_ID} ${ROS2_END_ID}) ; do
+    # for system maintenance
+    docker cp docker/ade_entrypoint ${CONTAINER_PREFIX}${i}:/ade_entrypoint
+    docker container restart ${CONTAINER_PREFIX}${i}
+    ADDR=$(ip_add ${START_IP} $((${i}-1)))
+    NEWUSRPASSWD=$(cat /proc/sys/kernel/random/uuid | head -c 8)
+    docker exec -d --user $USER ${CONTAINER_PREFIX}${i} /bin/bash -c \
+      "~/docker_browser_access_up.sh ${USER_PREFIX}${i} ${NEWUSRPASSWD} ${USER_ACCESS_PORT}"
+    echo "USERNAME   PASSWORD        ACCESS_ADDRESS"
+    echo "${USER_PREFIX}${i}      ${NEWUSRPASSWD}        ${ADDR}:${USER_ACCESS_PORT}"
+    echo "------------------------------------------------------------------"
   done
 elif [ $1 == "restart_one_instance_as_ros1" ]; then
   ADE_NAME=${CONTAINER_PREFIX}$2 ./ade stop
