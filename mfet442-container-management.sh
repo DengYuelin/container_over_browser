@@ -97,7 +97,8 @@ elif [ $1 == "restart" ]; then
     docker cp docker/ade_entrypoint ${CONTAINER_PREFIX}${i}:/ade_entrypoint
     docker container restart ${CONTAINER_PREFIX}${i}
     ADDR=$(ip_add ${START_IP} $((${i}-1)))
-    NEWUSRPASSWD=$(cat /proc/sys/kernel/random/uuid | head -c 8)
+    #NEWUSRPASSWD=$(cat /proc/sys/kernel/random/uuid | head -c 8)
+    NEWUSRPASSWD=${USER_PREFIX}${i}@purdue.edu
     docker exec -d --user $USER ${CONTAINER_PREFIX}${i} /bin/bash -c \
       "~/docker_browser_access_up.sh ${USER_PREFIX}${i} ${NEWUSRPASSWD} ${USER_ACCESS_PORT}"
     echo "USERNAME   PASSWORD        ACCESS_ADDRESS"
