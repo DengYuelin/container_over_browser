@@ -39,6 +39,8 @@ if [[ ! $(cat /etc/passwd | grep $NEW_USER) ]] ; then
     cp /home/$USER/docker/lxterminal.conf /home/$NEW_USER/.config/lxterminal/
     cp /home/$USER/.bashrc /home/$NEW_USER/.bashrc
     echo "cd /home/\${USER}/" >> /home/$NEW_USER/.bashrc
+    echo 'alias passwd=\'passwd "\$@" && /restart_remote_access.sh ${ACCESS_PORT}\'' >> /home/$NEW_USER/.bashrc
+    echo 'alias chpasswd=\'chpasswd "\$@" && /restart_remote_access.sh ${ACCESS_PORT}\'' >> /home/$NEW_USER/.bashrc
 
     # MFET 442: deploy vscode extensions and settings
     if [[ -d /home/$USER/.openvscode-server ]] ; then
@@ -56,9 +58,11 @@ elif [[ "$NEW_USER" == "$USER" ]]; then
 fi
 
 # with the new user, swithc to the new user and start the remote access service
-PASSWD_HASH=$(caddy hash-password --plaintext $NEW_PASSWD)
 if [[ "$NEW_USER" != "$USER" ]]; then
+    # Requires /etc/pam.d/common-password to specify blowfish as the hash method
+    PASSWD_HASH=$(sudo cat /etc/shadow | grep $NEW_USER | cut -d ":" -f 2)
     echo $NEW_PASSWD | sudo HTTP_BASIC_AUTH_PASSWD_HASH=$PASSWD_HASH ACCESS_PORT=$ACCESS_PORT -S su $NEW_USER -c "supervisord -c /etc/supervisord.conf"
 else
+    PASSWD_HASH=$(caddy hash-password --plaintext $NEW_PASSWD)
     HTTP_BASIC_AUTH_PASSWD_HASH=$PASSWD_HASH ACCESS_PORT=$ACCESS_PORT supervisord -c /etc/supervisord.conf
 fi

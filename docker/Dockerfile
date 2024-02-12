@@ -107,6 +107,11 @@ COPY ./docker/openbox_menu.xml /etc/xdg/openbox/menu.xml
 COPY ./docker/supervisord.conf /etc/
 COPY ./docker/Caddyfile /etc/
 COPY ./docker/apt_01norecommends /etc/apt/apt.conf.d/01norecommends
+# change default pam password hash method to blowfish, such that Caddy shares the same hash as the system
+RUN sed -i \
+    's/password.*[success=1 default=ignore].*pam_unix.so.*obscure.*sha512/password        [success=1 default=ignore]      pam_unix.so obscure blowfish/' \
+    /etc/pam.d/common-password
+COPY ./docker/restart_remote_access.sh /
 
 # enable NVIDIA GPU access for rendering inside contianers
 COPY ./docker/vulkan_nvidia_icd.json /etc/vulkan/icd.d/nvidia_icd.json

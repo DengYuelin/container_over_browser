@@ -12,7 +12,7 @@
 #
 # 2. Please modify the parameters below accordingly.
 # ID range of clients on this machine. This number is 1-based.
-START_ID=3
+START_ID=1
 # MFET442-specific: start a mix of ROS1 and ROS2 clients
 ROS1_END_ID=12
 ROS2_END_ID=16
@@ -94,16 +94,14 @@ if [ $1 == "start" ]; then
 elif [ $1 == "restart" ]; then
   for i in $(seq ${START_ID} ${ROS2_END_ID}) ; do
     # for system maintenance
-    docker cp docker/ade_entrypoint ${CONTAINER_PREFIX}${i}:/ade_entrypoint
+    # docker cp docker/ade_entrypoint ${CONTAINER_PREFIX}${i}:/ade_entrypoint
     docker container restart ${CONTAINER_PREFIX}${i}
-    ADDR=$(ip_add ${START_IP} $((${i}-1)))
-    #NEWUSRPASSWD=$(cat /proc/sys/kernel/random/uuid | head -c 8)
-    NEWUSRPASSWD=${USER_PREFIX}${i}@purdue.edu
+    # No password reset is required anymore
+    # ADDR=$(ip_add ${START_IP} $((${i}-1)))
+    # NEWUSRPASSWD=$(cat /proc/sys/kernel/random/uuid | head -c 8)
+    # NEWUSRPASSWD=${USER_PREFIX}${i}@purdue.edu
     docker exec -d --user $USER ${CONTAINER_PREFIX}${i} /bin/bash -c \
-      "~/docker_browser_access_up.sh ${USER_PREFIX}${i} ${NEWUSRPASSWD} ${USER_ACCESS_PORT}"
-    echo "USERNAME   PASSWORD        ACCESS_ADDRESS"
-    echo "${USER_PREFIX}${i}      ${NEWUSRPASSWD}        ${ADDR}:${USER_ACCESS_PORT}"
-    echo "------------------------------------------------------------------"
+      "/restart_remote_access.sh ${USER_ACCESS_PORT}"
   done
 elif [ $1 == "restart_one_instance_as_ros1" ]; then
   ADE_NAME=${CONTAINER_PREFIX}$2 ./ade stop
