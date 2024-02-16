@@ -16,6 +16,6 @@ ACCESS_PORT=${1:-9080}
 PASSWD_HASH=$(sudo cat /etc/shadow | grep $USER | cut -d ":" -f 2)
 
 # restart processes
-echo $NEW_PASSWD | sudo -S pkill -2 -f supervisord
+pkill -2 -f supervisord
 echo "Please refresh all windows and log in with your new credentials."
 HTTP_BASIC_AUTH_PASSWD_HASH=$PASSWD_HASH ACCESS_PORT=$ACCESS_PORT supervisord -c /etc/supervisord.conf > /dev/null 2>&1 &
