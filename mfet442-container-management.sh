@@ -101,7 +101,7 @@ elif [ $1 == "restart" ]; then
     # NEWUSRPASSWD=$(cat /proc/sys/kernel/random/uuid | head -c 8)
     # NEWUSRPASSWD=${USER_PREFIX}${i}@purdue.edu
     docker exec -d --user $USER ${CONTAINER_PREFIX}${i} /bin/bash -c \
-      "/restart_remote_access.sh ${USER_ACCESS_PORT}"
+      "/restart_remote_access.sh ${USER_ACCESS_PORT} ${USER_PREFIX}${i}"
   done
 elif [ $1 == "restart_one_instance_as_ros1" ]; then
   ADE_NAME=${CONTAINER_PREFIX}$2 ./ade stop

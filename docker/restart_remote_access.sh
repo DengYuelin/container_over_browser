@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ACCESS_PORT=${1:-9080}
+ALT_USER=${2:-$USER}
 
 # this line below is a generic approach
 # PASSWD_HASH=$(caddy hash-password --plaintext $NEW_PASSWD)
@@ -13,9 +14,14 @@ ACCESS_PORT=${1:-9080}
 # to
 # password       [success=1 default=ignore]      pam_unix.so obscure blowfish
 
-PASSWD_HASH=$(sudo cat /etc/shadow | grep $USER | cut -d ":" -f 2)
-
 # restart processes
-pkill -2 -f supervisord
 echo "Please refresh all windows and log in with your new credentials."
-HTTP_BASIC_AUTH_PASSWD_HASH=$PASSWD_HASH ACCESS_PORT=$ACCESS_PORT supervisord -c /etc/supervisord.conf > /dev/null 2>&1 &
+sudo pkill -2 -f supervisord
+
+PASSWD_HASH=$(sudo cat /etc/shadow | grep ${ALT_USER} | cut -d ":" -f 2)
+
+if [[ "$NEW_USER" != "$USER" ]]; then
+    sudo HTTP_BASIC_AUTH_PASSWD_HASH=$PASSWD_HASH ACCESS_PORT=$ACCESS_PORT -S su ${ALT_USER} -c "supervisord -c /etc/supervisord.conf > /dev/null 2>&1 &"
+else
+    HTTP_BASIC_AUTH_PASSWD_HASH=$PASSWD_HASH ACCESS_PORT=$ACCESS_PORT supervisord -c /etc/supervisord.conf > /dev/null 2>&1 &
+fi
