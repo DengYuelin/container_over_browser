@@ -17,8 +17,9 @@ ALT_USER=${2:-$USER}
 # restart processes
 echo "Please refresh all windows and log in with your new credentials."
 sudo pkill -2 -f noVNC
+sudo pkill -2 -f Xtigervnc
 sudo pkill -2 -f supervisord
-sudo rm /tmp/.X1* -rf
+sudo rm /tmp/.X1* -rf || true
 
 PASSWD_HASH=$(sudo cat /etc/shadow | grep ${ALT_USER} | cut -d ":" -f 2)
 
