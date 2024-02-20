@@ -16,11 +16,13 @@ ALT_USER=${2:-$USER}
 
 # restart processes
 echo "Please refresh all windows and log in with your new credentials."
+sudo pkill -2 -f noVNC
 sudo pkill -2 -f supervisord
+sudo rm /tmp/.X1* -rf
 
 PASSWD_HASH=$(sudo cat /etc/shadow | grep ${ALT_USER} | cut -d ":" -f 2)
 
-if [[ "$NEW_USER" != "$USER" ]]; then
+if [[ "$ALT_USER" != "$USER" ]]; then
     sudo HTTP_BASIC_AUTH_PASSWD_HASH=$PASSWD_HASH ACCESS_PORT=$ACCESS_PORT -S su ${ALT_USER} -c "supervisord -c /etc/supervisord.conf > /dev/null 2>&1 &"
 else
     HTTP_BASIC_AUTH_PASSWD_HASH=$PASSWD_HASH ACCESS_PORT=$ACCESS_PORT supervisord -c /etc/supervisord.conf > /dev/null 2>&1 &
